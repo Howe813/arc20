@@ -1,0 +1,15 @@
+{
+  "_comment": "arc-20 索引器配置模板（Arc 链，chain ID 5042，gas 为 USDC）。rpcUrl 可用付费端点（勿泄露到前端）。deployBlock 必须 <= Hub 合约的部署区块号。",
+  "rpcUrl": "https://rpc.mainnet.arc.io",
+  "chainId": 5042,
+  "explorerApi": "https://explorer.arc.io/api",
+  "hubAddress": "0x0000000000000000000000000000000000000000",
+  "marketAddress": "0x0000000000000000000000000000000000000000",
+  "deployBlock": 0,
+  "confirmations": 10,
+  "batchBlocks": 50,
+  "pollMs": 3000,
+  "port": 3000,
+  "stateFile": "state.json",
+  "eventsFile": "events.jsonl"
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>arc-20 logo concepts</title>
+<style>
+  body { margin: 0; padding: 40px; font-family: "Space Grotesk", Arial, sans-serif; background: linear-gradient(180deg,#b6cff0,#eff4fa 60%,#f6f9fc); color: #1b3158; }
+  h1 { font-weight: 300; font-size: 28px; margin: 0 0 6px; }
+  .sub { color: #5a6b8c; margin-bottom: 30px; }
+  .row { display: flex; gap: 26px; align-items: flex-end; margin-bottom: 34px; }
+  .concept { background: rgba(255,255,255,.8); border: 1px solid rgba(27,49,88,.14); border-radius: 14px; padding: 22px; }
+  .concept h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .concept p { margin: 0 0 16px; font-size: 12px; color: #5a6b8c; max-width: 240px; }
+  .sizes { display: flex; align-items: flex-end; gap: 18px; }
+  .cell { text-align: center; }
+  .cell small { display: block; margin-top: 6px; font-size: 10px; color: #8593ad; }
+  .on-dark { background: #10192e; border-radius: 10px; padding: 6px; }
+</style>
+</head>
+<body>
+<h1>arc·20 logo concepts</h1>
+<div class="sub">glyph on gradient tile · shown at 96 / 48 / 34 (topbar) / 16 (favicon) px · last cell on dark</div>
+
+<svg width="0" height="0"><defs>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#2b4ce2"/><stop offset=".55" stop-color="#7a3ce8"/><stop offset="1" stop-color="#c237ab"/>
+  </linearGradient>
+</defs></svg>
+
+<!-- 概念 A:挖矿环 —— Arc 环 + 缺口 nonce 点 -->
+<script>
+function tile(inner) {
+  return '<svg width="{S}" height="{S}" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="url(#g)"/>' + inner + '</svg>';
+}
+function at(concept, inner) {
+  return '<div class="concept"><h2>' + concept[0] + '</h2><p>' + concept[1] + '</p><div class="sizes">' +
+    [96, 48, 34, 16].map((s) => '<div class="cell">' + tile(inner).replaceAll('{S}', s) + '<small>' + s + 'px</small></div>').join('') +
+    '<div class="cell"><div class="on-dark">' + tile(inner).replaceAll('{S}', 48) + '</div><small>dark</small></div></div></div>';
+}
+// A: 开口环 + nonce 点(缺口朝 45° 右上)
+const arcPath = "M 45.3 18.7 A 19 19 0 1 0 50.3 26"; // 大弧,缺口在右上
+const A = ["A · Mining Ring", "Arc ring = chain/progress; the dot in the gap is the nonce just found. Reads as the mining loop itself."];
+// B: 精修 Λ(山/arc)+ 顶部 nonce 点
+const B = ["B · Summit Λ", "Refined lambda: mountain (mining) and a rising arc in one stroke; dot at the apex = the found nonce."];
+// C: 几何镐头
+const C = ["C · Pick Head", "Geometric pickaxe: crescent head + handle. The most literal mining glyph; busier at small sizes."];
+</script>
+
+<div class="row" id="rowA"></div>
+<div class="row" id="rowB"></div>
+<div class="row" id="rowC"></div>
+
+<script>
+// A: 环 + 点
+document.getElementById("rowA").innerHTML = at(A,
+  '<path d="M 45.3 18.7 A 19 19 0 1 0 50.3 26" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>' +
+  '<circle cx="51.5" cy="15.5" r="5.5" fill="#fff"/>');
+// B: Λ + 顶点外一点
+document.getElementById("rowB").innerHTML = at(B,
+  '<path d="M 15 48 L 32 14 L 49 48" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '<circle cx="32" cy="15" r="0" fill="none"/>');
+// C: 镐头(弧形头 + 手柄)
+document.getElementById("rowC").innerHTML = at(C,
+  '<path d="M 14 24 A 26 26 0 0 1 50 24 L 43.5 31 A 17 17 0 0 0 20.5 31 Z" fill="#fff"/>' +
+  '<rect x="29" y="26" width="6" height="28" rx="3" fill="#fff" transform="rotate(45 32 26)"/>');
+</script>
+</body>
+</html>

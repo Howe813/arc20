@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>arc-20 WebGPU miner self-test</title>
+<style>
+  body { font-family: ui-monospace, monospace; background: #10141a; color: #d6e2f0; padding: 24px; line-height: 1.7; }
+  .pass { color: #6dff9e; } .fail { color: #ff7b8a; } .dim { color: #7d8ca3; }
+  h2 { font-weight: 400; }
+</style>
+</head>
+<body>
+<h2>arc-20 WebGPU keccak self-test</h2>
+<div id="log"><span class="dim">running…</span></div>
+<script type="module">
+const log = (html) => { const el = document.getElementById("log"); el.innerHTML += "<div>" + html + "</div>"; };
+
+import { keccak256 } from "/keccak.mjs";
+import { GpuMiner } from "/wgpu-miner.mjs";
+const te = (s) => new TextEncoder().encode(s);
+const hex = (u8) => [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+try {
+  const m = await GpuMiner.create();
+  log("device: " + m.info);
+
+  // 92 字节消息:addr(20) + tickHash(32) + nonce(32) + mints(8)
+  const mkMsg = (addr, th, nonceBig, mintsBig) => {
+    const b = new Uint8Array(92);
+    b.set(new Uint8Array(new TextEncoder().encode("")), 0);
+    for (let i = 0; i < 20; i++) b[i] = parseInt(addr.slice(2 + i * 2, 4 + i * 2), 16);
+    const thb = th.replace(/^0x/, "").match(/../g).map((x) => parseInt(x, 16));
+    b.set(thb, 20);
+    let n = BigInt(nonceBig);
+    for (let i = 83; i >= 52; i--) { b[i] = Number(n & 0xffn); n >>= 8n; }
+    let mm = BigInt(mintsBig);
+    for (let i = 91; i >= 84; i--) { b[i] = Number(mm & 0xffn); mm >>= 8n; }
+    return b;
+  };
+
+  const vectors = [
+    { addr: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", th: keccak256(te("mine")), n: 0n, mm: 0n },
+    { addr: "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65", th: keccak256(te("arc")), n: 123456789012345678n, mm: 42n },
+    { addr: "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc", th: keccak256(te("zzzz0999")), n: 18446744073709551615n, mm: 18446744073709551615n },
+    // 隔离向量:92 零字节消息(setBase 的零基础块)— 期望值 = keccak256(92 零字节)
+    { empty: true, n: 0n, mm: 0n, js: keccak256(new Uint8Array(92)) },
+  ];
+
+  let allPass = true;
+  for (const [i, v] of vectors.entries()) {
+    let js, msg;
+    if (v.empty) {
+      msg = new Uint8Array(0);
+      js = v.js;
+      m.setBase("0x0000000000000000000000000000000000000000", "0x" + "00".repeat(32), 0n);
+      // 空消息:base 全零 + keccak 填充已由 setBase 处理(byte92=0x01,byte135=0x80)✓
+    } else {
+      msg = mkMsg(v.addr, v.th, v.n, v.mm);
+      js = keccak256(msg);
+      m.setBase(v.addr, v.th, v.mm);
+    }
+    const r = await m.mineBatch(v.n, 0, 1); // bits=0,count=1 → 线程 0 摘要 = nonce v.n 的哈希
+    const ok = r.digestHex === js;
+    allPass = allPass && ok;
+    log(`vector ${i}: nonce=${v.n} mints=${v.mm} → <span class="${ok ? "pass" : "fail"}">${ok ? "PASS" : "FAIL"}</span>` +
+      (ok ? "" : `<br><span class="dim">gpu ${r.digestHex}<br>js  ${js}</span>`));
+  }
+
+  // 算力基准:bits=0 全过,测吞吐(count=2M)
+  m.setBase("0x70997970c51812dc3a010c7d01b50e0d17dc79c8", keccak256(te("mine")), 0n);
+  let best = 0;
+  for (let i = 0; i < 3; i++) {
+    const r = await m.mineBatch(BigInt(i) * 2000000n, 0, 2000000);
+    best = Math.max(best, Math.round((r.hashes / r.ms) * 1000));
+  }
+  log("throughput: <b>" + best.toLocaleString() + "</b> H/s (GPU)");
+  log(allPass ? '<span class="pass">ALL VECTORS PASS — GPU keccak matches JS reference</span>' : '<span class="fail">MISMATCH — do not use GPU mining</span>');
+  log('<span class="dim">bits=0 benchmark; found flag noise ignored</span>');
+} catch (e) {
+  log('<span class="fail">ERROR: ' + String(e && e.message || e) + "</span>");
+}
+</script>
+</body>
+</html>

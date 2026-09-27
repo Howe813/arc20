@@ -1,0 +1,15 @@
+{
+  "_comment": "Arc 主网(chain 5042, gas 为 USDC)生产配置模板。deploy-mainnet.sh 广播后会自动把 hubAddress/marketAddress/deployBlock 填好并生成 config.production.json。rpcUrl 可用付费端点,勿泄露到前端;可用 systemd EnvironmentFile 的 RPC_URL 覆盖。stateFile/eventsFile 用服务器持久盘绝对路径。",
+  "rpcUrl": "https://rpc.mainnet.arc.io",
+  "chainId": 5042,
+  "explorerApi": "https://explorer.arc.io/api",
+  "hubAddress": "0x0000000000000000000000000000000000000000",
+  "marketAddress": "0x0000000000000000000000000000000000000000",
+  "deployBlock": 0,
+  "confirmations": 10,
+  "batchBlocks": 200,
+  "pollMs": 3000,
+  "port": 3000,
+  "stateFile": "/opt/arc20/indexer/state.json",
+  "eventsFile": "/opt/arc20/indexer/events.jsonl"
+}

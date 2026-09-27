@@ -1,0 +1,33 @@
+# systemd unit — arc-20 indexer (accounting authority). Runs 24/7, auto-restart.
+# Install: sudo cp ops/arc20-indexer.service /etc/systemd/system/
+#          sudo systemctl daemon-reload && sudo systemctl enable --now arc20-indexer
+# Logs:    journalctl -u arc20-indexer -f
+[Unit]
+Description=arc-20 inscription indexer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arc20
+WorkingDirectory=/opt/arc20
+# CONFIG_PATH points at the production config (mainnet RPC + contract addresses).
+# RPC_URL can override the config's rpcUrl (keep any keyed RPC out of the repo).
+Environment=CONFIG_PATH=/opt/arc20/indexer/config.production.json
+EnvironmentFile=-/etc/arc20/indexer.env
+ExecStart=/usr/bin/node /opt/arc20/indexer/indexer.mjs
+Restart=always
+RestartSec=3
+# The indexer halts (exit 1) on a reorg, over-mint, or PoW mismatch — restart,
+# then a human follows the runbook (ops/README.md) if it keeps exiting.
+StartLimitIntervalSec=60
+StartLimitBurst=10
+# hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/arc20/indexer
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

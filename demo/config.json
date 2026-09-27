@@ -1,0 +1,12 @@
+{
+  "rpcUrl": "http://127.0.0.1:8545",
+  "hubAddress": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  "marketAddress": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+  "deployBlock": 0,
+  "confirmations": 0,
+  "batchBlocks": 500,
+  "pollMs": 2000,
+  "port": 3000,
+  "stateFile": "C:\\Users\\Howeg\\Desktop\\arc20\\rob-20\\demo\\state.json",
+  "eventsFile": "C:\\Users\\Howeg\\Desktop\\arc20\\rob-20\\demo\\events.jsonl"
+}

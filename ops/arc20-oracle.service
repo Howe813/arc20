@@ -1,0 +1,33 @@
+# systemd unit — arc-20 market oracle (confirms listings, settles bids). 24/7.
+# The oracle key is a DEDICATED low-value hot wallet (only spends gas to call
+# confirm/settleBid). It is loaded from a root-only EnvironmentFile as a raw
+# key because cast keystores can't unlock headless. Keep /etc/arc20/oracle.env 0600.
+# Install: sudo cp ops/arc20-oracle.service /etc/systemd/system/
+#          sudo systemctl daemon-reload && sudo systemctl enable --now arc20-oracle
+[Unit]
+Description=arc-20 market oracle
+After=network-online.target arc20-indexer.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arc20
+WorkingDirectory=/opt/arc20
+Environment=CONFIG_PATH=/opt/arc20/indexer/config.production.json
+Environment=API_URL=http://127.0.0.1:3000
+# cast must be at this absolute path (install -m 0755 /root/.foundry/bin/cast
+# /usr/local/bin/cast): ProtectHome=true hides /root, so a PATH entry to
+# /root/.foundry/bin is dead and bare "cast" may not resolve.
+Environment=CAST_BIN=/usr/local/bin/cast
+# oracle.env defines ORACLE_PRIVATE_KEY=0x... (and optionally RPC_URL=)
+EnvironmentFile=/etc/arc20/oracle.env
+ExecStart=/usr/bin/node /opt/arc20/indexer/oracle.mjs
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
