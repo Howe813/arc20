@@ -34,11 +34,7 @@ contract InscriptionHubTest is Test {
 
     /// Mirrors the consensus preimage exactly: miner ++ tickHash ++ nonce ++
     /// mintsOf (uint64 → 8 bytes, same encoding as the contract's counter).
-    function _satisfies(address m, bytes32 th, uint256 nonce, uint256 d, uint64 count)
-        internal
-        pure
-        returns (bool)
-    {
+    function _satisfies(address m, bytes32 th, uint256 nonce, uint256 d, uint64 count) internal pure returns (bool) {
         return uint256(keccak256(abi.encodePacked(m, th, nonce, count))) >> (256 - d) == 0;
     }
 

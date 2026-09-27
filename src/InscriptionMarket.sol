@@ -114,9 +114,7 @@ contract InscriptionMarket is Ownable, ReentrancyGuard {
 
         // dispatch on the op prefix: `list` creates a listing, `accept` binds a
         // bid fill; anything else reverts in the respective parser
-        if (
-            msg.data.length >= PREFIX.length && _matchesConst(msg.data, 0, PREFIX)
-        ) {
+        if (msg.data.length >= PREFIX.length && _matchesConst(msg.data, 0, PREFIX)) {
             (bytes32 th, bytes calldata tick, uint256 amt, uint256 price) = _parseList(msg.data);
 
             uint256 id = nextId++;
@@ -258,12 +256,7 @@ contract InscriptionMarket is Ownable, ReentrancyGuard {
         id = nextBidId++;
         bytes32 th = keccak256(t);
         bids[id] = Bid({
-            bidder: msg.sender,
-            tickHash: th,
-            amt: amt,
-            price: price,
-            pendingSeller: address(0),
-            status: BidStatus.Open
+            bidder: msg.sender, tickHash: th, amt: amt, price: price, pendingSeller: address(0), status: BidStatus.Open
         });
         emit BidPlaced(id, msg.sender, th, tick, amt, price);
     }

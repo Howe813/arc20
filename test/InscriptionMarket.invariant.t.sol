@@ -52,9 +52,8 @@ contract MarketHandler is Test {
         // the binding is already taken, skip — the bid stays escrowed for the
         // bidder (refundable via cancelBid), never misdirected.
         address s = _actor(sellerSeed);
-        bytes memory data = bytes(
-            string.concat('data:,{"p":"arc-20","op":"accept","tick":"robin","bid":"', vm.toString(id), '"}')
-        );
+        bytes memory data =
+            bytes(string.concat('data:,{"p":"arc-20","op":"accept","tick":"robin","bid":"', vm.toString(id), '"}'));
         vm.prank(s);
         (bool ok,) = address(market).call(data);
         if (!ok) return;
@@ -102,7 +101,12 @@ contract MarketHandler is Test {
         ids[0] = id;
         vm.deal(b, b.balance + pay);
         vm.prank(b);
-        try market.sweep{value: pay}(ids) { sweepOKs++; sweepCalls++; } catch { sweepFails++; }
+        try market.sweep{value: pay}(ids) {
+            sweepOKs++;
+            sweepCalls++;
+        } catch {
+            sweepFails++;
+        }
     }
 
     function listAndConfirm(uint256 sellerSeed, uint128 price) public {

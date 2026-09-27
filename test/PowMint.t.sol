@@ -32,11 +32,7 @@ contract PowMintTest is Test {
     /// Mirrors the consensus preimage EXACTLY: miner ++ tickHash ++ nonce ++
     /// mintsOf (uint64 → 8 big-endian bytes on the contract side, so `count`
     /// must stay uint64 here or the packed encoding diverges).
-    function _satisfies(address m, bytes32 th, uint256 nonce, uint256 d, uint64 count)
-        internal
-        pure
-        returns (bool)
-    {
+    function _satisfies(address m, bytes32 th, uint256 nonce, uint256 d, uint64 count) internal pure returns (bool) {
         return uint256(keccak256(abi.encodePacked(m, th, nonce, count))) >> (256 - d) == 0;
     }
 
@@ -47,11 +43,7 @@ contract PowMintTest is Test {
     }
 
     /// Mine starting from a floor nonce (avoids reusing a consumed nonce).
-    function _mineAt(address m, bytes32 th, uint256 d, uint256 from, uint64 count)
-        internal
-        pure
-        returns (uint256 n)
-    {
+    function _mineAt(address m, bytes32 th, uint256 d, uint256 from, uint64 count) internal pure returns (uint256 n) {
         n = from;
         while (!_satisfies(m, th, n, d, count)) n++;
     }
@@ -233,7 +225,9 @@ contract PowMintTest is Test {
 
     function test_RetargetInvalidatesOldSolution() public {
         // fill the epoch in one timestamp → difficulty jumps 8 → 32
-        for (uint256 i = 0; i < EPOCH_MINTS; i++) assertTrue(_mineAndMint());
+        for (uint256 i = 0; i < EPOCH_MINTS; i++) {
+            assertTrue(_mineAndMint());
+        }
         assertEq(_curDiff(POW), 32);
         // a solution mined under the OLD difficulty (8 bits) is dead: the hub
         // now enforces 32 bits on every submit, regardless of how it was mined
@@ -311,12 +305,11 @@ contract PowMintTest is Test {
     // ---- R17: oversized amounts revert canonically (no Panic 0x11) ----
 
     /// Build a mint calldata with a `digits`-long decimal amount.
-    function _mintWithAmtDigits(uint256 digits)
-        internal
-        returns (bool ok, bytes memory ret)
-    {
+    function _mintWithAmtDigits(uint256 digits) internal returns (bool ok, bytes memory ret) {
         bytes memory huge = new bytes(digits);
-        for (uint256 i = 0; i < digits; i++) huge[i] = bytes1("9");
+        for (uint256 i = 0; i < digits; i++) {
+            huge[i] = bytes1("9");
+        }
         bytes memory data = bytes(
             string.concat('data:,{"p":"arc-20","op":"mint","tick":"pow","amt":"', string(huge), '","nonce":"1"}')
         );
@@ -394,9 +387,8 @@ contract PowMintTest is Test {
 
     /// Low-level mint with an explicit amt string (for boundary cases).
     function _mintWithAmt(string memory amt) internal returns (bool ok, bytes memory ret) {
-        bytes memory data = bytes(
-            string.concat('data:,{"p":"arc-20","op":"mint","tick":"pow","amt":"', amt, '","nonce":"1"}')
-        );
+        bytes memory data =
+            bytes(string.concat('data:,{"p":"arc-20","op":"mint","tick":"pow","amt":"', amt, '","nonce":"1"}'));
         vm.prank(alice, alice);
         (ok, ret) = address(hub).call(data);
     }

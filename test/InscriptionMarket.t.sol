@@ -602,7 +602,9 @@ contract InscriptionMarketTest is Test {
         _listCustom(buyer, 500, 0.05 ether); // id 3 — someone else's order
 
         uint256[] memory ids = new uint256[](3);
-        ids[0] = 1; ids[1] = 2; ids[2] = 3;
+        ids[0] = 1;
+        ids[1] = 2;
+        ids[2] = 3;
         vm.prank(seller);
         uint256 n = market.cancelMany(ids);
         assertEq(n, 1, "skip-any: only the caller's open listing is cancelled");
@@ -630,7 +632,8 @@ contract InscriptionMarketTest is Test {
         // unknown ids map to a zeroed Listing (seller == 0) → skipped, no revert
         _listCustom(seller, 500, 0.05 ether); // id 1
         uint256[] memory ids = new uint256[](2);
-        ids[0] = 999; ids[1] = 1;
+        ids[0] = 999;
+        ids[1] = 1;
         vm.prank(seller);
         assertEq(market.cancelMany(ids), 1, "unknown ids skipped, own listing cancelled");
     }
@@ -666,9 +669,7 @@ contract InscriptionMarketTest is Test {
         uint256 owed = 1 ether - (0.05 ether + 0.0025 ether);
         assertEq(market.pendingProceeds(address(rb)), owed, "overpay parked as pending refund");
         // conservation: contract holds fees + the parked refund, nothing lost
-        assertEq(
-            address(market).balance, market.accruedFees() + market.pendingProceeds(address(rb)), "funds conserved"
-        );
+        assertEq(address(market).balance, market.accruedFees() + market.pendingProceeds(address(rb)), "funds conserved");
     }
 
     // ---- R18 boundary gaps ----
@@ -688,7 +689,9 @@ contract InscriptionMarketTest is Test {
         _listCustom(seller, 500, 0.05 ether); // id 1
         _confirm(1);
         uint256[] memory ids = new uint256[](50);
-        for (uint256 i = 0; i < 50; i++) ids[i] = 1;
+        for (uint256 i = 0; i < 50; i++) {
+            ids[i] = 1;
+        }
         vm.deal(buyer, 1 ether);
         vm.prank(buyer);
         market.sweep{value: PRICE + FEE}(ids);
@@ -699,7 +702,9 @@ contract InscriptionMarketTest is Test {
     function test_RevertWhen_SweepExceedsMaxSweepIds() public {
         _listCustom(seller, 500, 0.05 ether); // id 1
         uint256[] memory ids = new uint256[](51);
-        for (uint256 i = 0; i < 51; i++) ids[i] = 1;
+        for (uint256 i = 0; i < 51; i++) {
+            ids[i] = 1;
+        }
         vm.deal(buyer, 1 ether);
         vm.prank(buyer);
         vm.expectRevert(InscriptionMarket.BadSweepLength.selector);
@@ -723,11 +728,10 @@ contract InscriptionMarketTest is Test {
 
     /// Raw list calldata with explicit amt/price strings (for digit-bound cases).
     function _listData(string memory amt, string memory price) internal pure returns (bytes memory) {
-        return bytes(
-            string.concat(
-                'data:,{"p":"arc-20","op":"list","tick":"robin","amt":"', amt, '","price":"', price, '"}'
-            )
-        );
+        return
+            bytes(
+                string.concat('data:,{"p":"arc-20","op":"list","tick":"robin","amt":"', amt, '","price":"', price, '"}')
+            );
     }
 
     function test_SweepDuplicateIdsChargedOnce() public {
@@ -795,11 +799,8 @@ contract InscriptionMarketTest is Test {
     /// Bind a bid fill on-chain: the seller sends the canonical accept
     /// inscription to the market (consensus v4 delivery proof).
     function _accept(address who, uint256 bidId) internal returns (bool ok) {
-        bytes memory data = bytes(
-            string.concat(
-                'data:,{"p":"arc-20","op":"accept","tick":"robin","bid":"', vm.toString(bidId), '"}'
-            )
-        );
+        bytes memory data =
+            bytes(string.concat('data:,{"p":"arc-20","op":"accept","tick":"robin","bid":"', vm.toString(bidId), '"}'));
         vm.prank(who, who);
         (ok,) = address(market).call(data);
     }

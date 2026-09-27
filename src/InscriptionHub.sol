@@ -203,11 +203,7 @@ contract InscriptionHub {
     ///      Returns (keccak256(tick), amt, nonce). Reverts on ANY deviation.
     ///      (The old `hasNonce` return was always true — a missing nonce reverts
     ///      in the marker comparison — so the flag was dead weight.)
-    function _parseMint(bytes calldata d)
-        internal
-        pure
-        returns (bytes32 th, uint256 amt, uint256 nonce)
-    {
+    function _parseMint(bytes calldata d) internal pure returns (bytes32 th, uint256 amt, uint256 nonce) {
         uint256 pLen = PREFIX.length;
         uint256 mLen = AMT_MARKER.length;
         // minimum: prefix + 1-char tick + marker + 1-digit amt + nonce marker + 1-digit nonce + tail
